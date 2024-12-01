@@ -1,0 +1,49 @@
+version: "3.8"
+
+services:
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+    networks:
+      - app_network
+    environment:
+      - API_URL=http://backend:5000
+
+  backend:
+    build:
+      context: ./backend
+    ports:
+      - "5000:5000"
+    depends_on:
+      - database
+    networks:
+      - app_network
+    environment:
+      - DB_HOST=database
+      - DB_USER=admin
+      - DB_PASSWORD=secret
+      - DB_NAME=app_db
+
+  database:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: app_db
+    ports:
+      - "5432:5432"
+    networks:
+      - app_network
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+networks:
+  app_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
